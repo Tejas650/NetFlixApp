@@ -1,12 +1,4 @@
-import {
-  Button,
-  Image,
-  KeyboardAvoidingView,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import {Image, KeyboardAvoidingView, Pressable, Text, View} from 'react-native';
 import React, {useState} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {Input} from 'react-native-elements';
@@ -117,11 +109,3 @@ const Login = ({navigation}) => {
 };
 
 export default Login;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
