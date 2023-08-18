@@ -58,7 +58,12 @@ const Register = ({navigation}) => {
           />
         </View>
         <Pressable
-          onPress={() => navigation.navigate('Plans')}
+          onPress={() =>
+            navigation.navigate('Plans', {
+              email: input,
+              password: password,
+            })
+          }
           style={
             password.length > 4
               ? {
