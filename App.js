@@ -3,14 +3,17 @@ import {StatusBar} from 'react-native';
 import React from 'react';
 import StackNavigator from './StackNavigator';
 import stripeConfig from './stripeConfig';
+import {ProfileContext} from './Context';
 
 const App = () => {
   return (
     <>
-      <StripeProvider publishableKey={stripeConfig.publishableKey}>
-        <StackNavigator />
-        <StatusBar style="auto" />
-      </StripeProvider>
+      <ProfileContext>
+        <StripeProvider publishableKey={stripeConfig.publishableKey}>
+          <StackNavigator />
+          <StatusBar style="auto" />
+        </StripeProvider>
+      </ProfileContext>
     </>
   );
 };

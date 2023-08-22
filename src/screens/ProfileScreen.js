@@ -1,11 +1,16 @@
 import {FlatList, Image, Pressable, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import React, {useContext} from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {signOut} from 'firebase/auth';
 import {auth} from '../../firebase';
+import {MovieItems} from '../../Context';
 
 const ProfileScreen = ({navigation}) => {
+  const {profile, setProfile} = useContext(MovieItems);
+
+  console.log('Selected Profile', profile);
+
   const profiles = [
     {
       id: '0',
@@ -81,6 +86,10 @@ const ProfileScreen = ({navigation}) => {
           data={profiles}
           renderItem={({item}) => (
             <Pressable
+              onPress={() => {
+                setProfile(item);
+                navigation.navigate('Loading');
+              }}
               style={{marginHorizontal: 20, padding: 20, marginTop: 10}}>
               <Image
                 style={{
