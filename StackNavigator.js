@@ -5,6 +5,7 @@ import Login from './src/screens/Login';
 import Register from './src/screens/Register';
 import PlanScreen from './src/screens/PlanScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import LoadingScreen from './src/screens/LoadingScreen';
 
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -36,6 +37,13 @@ const StackNavigator = () => {
         <Stack.Screen
           name="Profile"
           component={ProfileScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Loading"
+          component={LoadingScreen}
           options={{
             headerShown: false,
           }}
