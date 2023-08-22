@@ -1,12 +1,16 @@
+import {StripeProvider} from '@stripe/stripe-react-native';
 import {StatusBar} from 'react-native';
 import React from 'react';
 import StackNavigator from './StackNavigator';
+import stripeConfig from './stripeConfig';
 
 const App = () => {
   return (
     <>
-      <StatusBar style="auto" />
-      <StackNavigator />
+      <StripeProvider publishableKey={stripeConfig.publishableKey}>
+        <StackNavigator />
+        <StatusBar style="auto" />
+      </StripeProvider>
     </>
   );
 };

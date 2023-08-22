@@ -1,12 +1,52 @@
-import {Pressable, ScrollView, Text, View} from 'react-native';
+import {Alert, Pressable, ScrollView, Text, View} from 'react-native';
 import React, {useState} from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import Feather from 'react-native-vector-icons/Feather';
 import plan from '../../data/plan';
 import Fontisto from 'react-native-vector-icons/Fontisto';
+import {createUserWithEmailAndPassword} from 'firebase/auth';
+import {auth} from '../../firebase';
+import {useStripe} from '@stripe/stripe-react-native';
 
 const PlanScreen = ({route}) => {
   const data = plan;
+
+  const stripe = useStripe();
+
+  const email = route.params.email;
+  const password = route.params.password;
+
+  const subscribe = async () => {
+    const response = await fetch('http://localhost:8080/payment', {
+      method: 'POST',
+      body: JSON.stringify({
+        amount: Math.floor(price * 100),
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    const datas = await response.json();
+    console.log(datas);
+    if (!response.ok) return Alert.alert(datas.message);
+    const clientSecret = datas.clientSecret;
+    const initSheet = await stripe.initPaymentSheet({
+      paymentIntentClientSecret: clientSecret,
+    });
+    if (initSheet.error) return Alert.alert(initSheet.error.message);
+    const presentSheet = await stripe.presentPaymentSheet({
+      clientSecret,
+    });
+    if (presentSheet.error) return Alert.alert(presentSheet.error.message);
+    else {
+      createUserWithEmailAndPassword(auth, email, password).then(
+        userCredentials => {
+          console.log(userCredentials);
+          const user = userCredentials.user;
+          console.log(user.email);
+        },
+      );
+    }
+  };
 
   const [selected, setSelected] = useState([]);
   const [price, setPrice] = useState([]);
@@ -167,7 +207,7 @@ const PlanScreen = ({route}) => {
             </Text>
           </View>
 
-          <Pressable>
+          <Pressable onPress={() => subscribe()}>
             <Text style={{fontSize: 17, fontWeight: 'bold', color: 'white'}}>
               PAY ₹{price}
             </Text>
