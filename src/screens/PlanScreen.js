@@ -1,133 +1,221 @@
-import {Pressable, ScrollView, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {Alert, Pressable, ScrollView, Text, View} from 'react-native';
+import React, {useState} from 'react';
 import Feather from 'react-native-vector-icons/Feather';
 import plan from '../../data/plan';
 import Fontisto from 'react-native-vector-icons/Fontisto';
+import {createUserWithEmailAndPassword} from 'firebase/auth';
+import {auth} from '../../firebase';
+import {useStripe} from '@stripe/stripe-react-native';
 
 const PlanScreen = ({route}) => {
   const data = plan;
 
+  const stripe = useStripe();
+
+  const email = route.params.email;
+  const password = route.params.password;
+
+  const subscribe = async () => {
+    const response = await fetch('http://localhost:8080/payment', {
+      method: 'POST',
+      body: JSON.stringify({
+        amount: Math.floor(price * 100),
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    const datas = await response.json();
+    console.log(datas);
+    if (!response.ok) return Alert.alert(datas.message);
+    const clientSecret = datas.clientSecret;
+    const initSheet = await stripe.initPaymentSheet({
+      paymentIntentClientSecret: clientSecret,
+    });
+    if (initSheet.error) return Alert.alert(initSheet.error.message);
+    const presentSheet = await stripe.presentPaymentSheet({
+      clientSecret,
+    });
+    if (presentSheet.error) return Alert.alert(presentSheet.error.message);
+    else {
+      createUserWithEmailAndPassword(auth, email, password).then(
+        userCredentials => {
+          console.log(userCredentials);
+          const user = userCredentials.user;
+          console.log(user.email);
+        },
+      );
+    }
+  };
+
+  const [selected, setSelected] = useState([]);
+  const [price, setPrice] = useState([]);
+
+  console.log(selected, 'Selected', '&&', price, 'Price');
+
   return (
-    <ScrollView style={{marginTop: 50, marginBottom: 20}}>
-      <View style={{padding: 10}}>
-        <Text style={{fontSize: 18, fontWeight: '600'}}>
-          Choose the plan that is right for you
-        </Text>
-
-        <View
-          style={{flexDirection: 'row', alignItems: 'center', marginTop: 10}}>
-          <Feather name="check" size={24} color="#e50914" />
-          <Text style={{marginLeft: 6, fontSize: 16, fontWeight: '600'}}>
-            Watch all you want Ad free
+    <>
+      <ScrollView style={{marginTop: 48}}>
+        <View style={{padding: 10}}>
+          <Text style={{fontSize: 18, fontWeight: '600'}}>
+            Choose the plan that is right for you
           </Text>
-        </View>
 
-        <View
-          style={{flexDirection: 'row', alignItems: 'center', marginTop: 3}}>
-          <Feather name="check" size={24} color="#e50914" />
-          <Text style={{marginLeft: 6, fontSize: 16, fontWeight: '600'}}>
-            Recommendations just for you
-          </Text>
-        </View>
+          <View
+            style={{flexDirection: 'row', alignItems: 'center', marginTop: 10}}>
+            <Feather name="check" size={24} color="#e50914" />
+            <Text style={{marginLeft: 6, fontSize: 16, fontWeight: '600'}}>
+              Watch all you want Ad free
+            </Text>
+          </View>
 
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <Feather name="check" size={24} color="#e50914" />
-          <Text style={{marginLeft: 6, fontSize: 16, fontWeight: '600'}}>
-            Cancel your plan anytime
-          </Text>
-        </View>
+          <View
+            style={{flexDirection: 'row', alignItems: 'center', marginTop: 3}}>
+            <Feather name="check" size={24} color="#e50914" />
+            <Text style={{marginLeft: 6, fontSize: 16, fontWeight: '600'}}>
+              Recommendations just for you
+            </Text>
+          </View>
 
-        <View style={{marginTop: 20}}>
-          {data.map((item, index) => (
-            <Pressable
-              style={{
-                height: 160,
-                borderRadius: 7,
-                borderColor: '#e50914',
-                borderWidth: 0.5,
-                padding: 15,
-                margin: 10,
-              }}
-              key={index}>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                }}>
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <Feather name="check" size={24} color="#e50914" />
+            <Text style={{marginLeft: 6, fontSize: 16, fontWeight: '600'}}>
+              Cancel your plan anytime
+            </Text>
+          </View>
+
+          <View style={{marginTop: 20}}>
+            {data.map((item, index) => (
+              <Pressable
+                onPress={() => {
+                  setSelected(item.name);
+                  setPrice(item.price);
+                }}
+                style={
+                  selected.includes(item.name)
+                    ? {
+                        height: 170,
+                        borderRadius: 7,
+                        borderColor: '#e50914',
+                        borderWidth: 2,
+                        padding: 15,
+                        margin: 10,
+                      }
+                    : {
+                        height: 170,
+                        borderRadius: 7,
+                        borderColor: '#e50914',
+                        borderWidth: 0.5,
+                        padding: 15,
+                        margin: 10,
+                      }
+                }
+                key={index}>
                 <View
                   style={{
-                    backgroundColor: '#e50914',
-                    padding: 10,
-                    width: 120,
-                    borderRadius: 7,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
                   }}>
-                  <Text
+                  <View
                     style={{
-                      textAlign: 'center',
-                      color: 'white',
-                      fontSize: 16,
-                      fontWeight: '600',
+                      backgroundColor: '#e50914',
+                      padding: 10,
+                      width: 120,
+                      borderRadius: 7,
                     }}>
-                    {item.name}
+                    <Text
+                      style={{
+                        textAlign: 'center',
+                        color: 'white',
+                        fontSize: 16,
+                        fontWeight: '600',
+                      }}>
+                      {item.name}
+                    </Text>
+                  </View>
+
+                  <Text style={{fontSize: 18, fontWeight: '600'}}>
+                    Price: ₹{item.price}
                   </Text>
                 </View>
 
-                <Text style={{fontSize: 18, fontWeight: '600'}}>
-                  Price: ₹{item.price}
-                </Text>
-              </View>
-
-              <View
-                style={{
-                  marginTop: 15,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                }}>
-                <View>
-                  <Text
-                    style={{color: 'gray', fontSize: 15, fontWeight: '500'}}>
-                    Video Quality : {item.videoQuality}
-                  </Text>
-                  <Text style={{fontSize: 16, fontWeight: '500', marginTop: 3}}>
-                    Resolution : {item.resolution}
-                  </Text>
+                <View
+                  style={{
+                    marginTop: 15,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}>
+                  <View>
+                    <Text
+                      style={{color: 'gray', fontSize: 15, fontWeight: '500'}}>
+                      Video Quality : {item.videoQuality}
+                    </Text>
+                    <Text
+                      style={{fontSize: 16, fontWeight: '500', marginTop: 3}}>
+                      Resolution : {item.resolution}
+                    </Text>
+                  </View>
+                  <Fontisto
+                    style={{marginRight: 6}}
+                    name="netflix"
+                    size={28}
+                    color="#111"
+                  />
                 </View>
-                <Fontisto
-                  style={{marginRight: 6}}
-                  name="netflix"
-                  size={28}
-                  color="#111"
-                />
-              </View>
 
-              <View
-                style={{
-                  marginTop: 10,
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                }}>
-                <Text style={{fontSize: 16}}>Devices You can watch On : </Text>
-                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                  {item.devices.map(device => (
-                    <Fontisto
-                      style={{marginRight: 6}}
-                      name={device.name}
-                      size={27}
-                      color="#e50914"
-                    />
-                  ))}
+                <View
+                  style={{
+                    marginTop: 10,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                  }}>
+                  <Text style={{fontSize: 16}}>
+                    Devices You can watch On :{' '}
+                  </Text>
+                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    {item.devices.map(device => (
+                      <Fontisto
+                        style={{marginRight: 6}}
+                        name={device.name}
+                        size={25}
+                        color="#e50914"
+                      />
+                    ))}
+                  </View>
                 </View>
-              </View>
-            </Pressable>
-          ))}
+              </Pressable>
+            ))}
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+
+      {selected.length > 0 && (
+        <Pressable
+          style={{
+            backgroundColor: '#e50914',
+            padding: 10,
+            marginBottom: 15,
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            height: 55,
+          }}>
+          <View>
+            <Text style={{color: 'white', fontSize: 17, fontWeight: '600'}}>
+              Selected Plan {selected}
+            </Text>
+          </View>
+
+          <Pressable onPress={() => subscribe()}>
+            <Text style={{fontSize: 17, fontWeight: 'bold', color: 'white'}}>
+              PAY ₹{price}
+            </Text>
+          </Pressable>
+        </Pressable>
+      )}
+    </>
   );
 };
 
 export default PlanScreen;
-
-const styles = StyleSheet.create({});

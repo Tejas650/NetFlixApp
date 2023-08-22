@@ -58,6 +58,7 @@ const Register = ({navigation}) => {
           />
         </View>
         <Pressable
+          disabled={(!input && !password) || password.length < 6}
           onPress={() =>
             navigation.navigate('Plans', {
               email: input,
@@ -65,7 +66,7 @@ const Register = ({navigation}) => {
             })
           }
           style={
-            password.length > 4
+            password.length > 6
               ? {
                   width: 300,
                   backgroundColor: 'red',
