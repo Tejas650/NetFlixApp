@@ -6,6 +6,8 @@ import Register from './src/screens/Register';
 import PlanScreen from './src/screens/PlanScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import LoadingScreen from './src/screens/LoadingScreen';
+import HomeScreen from './src/screens/HomeScreen';
+import Header from './src/components/Header';
 
 const StackNavigator = () => {
   const Stack = createNativeStackNavigator();
@@ -44,6 +46,13 @@ const StackNavigator = () => {
         <Stack.Screen
           name="Loading"
           component={LoadingScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
           options={{
             headerShown: false,
           }}
