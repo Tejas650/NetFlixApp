@@ -1,7 +1,13 @@
 import {ActivityIndicator, StyleSheet, Text, View} from 'react-native';
-import React from 'react';
+import React, {useEffect} from 'react';
 
-const LoadingScreen = () => {
+const LoadingScreen = ({navigation}) => {
+  useEffect(() => {
+    setTimeout(() => {
+      navigation.replace('Home');
+    }, 1000);
+  }, []);
+
   return (
     <View
       style={{
